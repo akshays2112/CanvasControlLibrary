@@ -1418,34 +1418,37 @@ public class CanvasControlLibrary
 
     public CanvasControlLibrary(Stream InputStream)
     {
-        InputParams = new List<object>();
-        byte[] rdata = new byte[Convert.ToInt32(InputStream.Length)];
-        InputStream.Read(rdata, 0, Convert.ToInt32(InputStream.Length));
-        string strData = Encoding.ASCII.GetString(rdata);
-        strData = strData.Replace("[", "<");
-        strData = strData.Replace("]", ">");
-        strData = strData.Replace("&lb;", "[");
-        strData = strData.Replace("&rb;", "]");
-        XmlDocument vars = new XmlDocument();
-        vars.LoadXml("<root>" + strData + "</root>");
-        FunctionName = vars.FirstChild.ChildNodes[0].InnerXml;
-        CanvasID = vars.FirstChild.ChildNodes[1].InnerXml;
-        WindowID = vars.FirstChild.ChildNodes[2].InnerXml;
-        UnwrapVars(vars.FirstChild.ChildNodes[3]);
-        UnwrapParams(vars.FirstChild.ChildNodes[5]);
-        if (vars.FirstChild.ChildNodes[4].InnerXml != null && vars.FirstChild.ChildNodes[4].InnerXml != "null")
+        if (InputStream != null && InputStream.Length > 0)
         {
-            Guid tmp = new Guid(vars.FirstChild.ChildNodes[4].InnerXml);
-            foreach (Session s in Sessions.SessionsData)
+            InputParams = new List<object>();
+            byte[] rdata = new byte[Convert.ToInt32(InputStream.Length)];
+            InputStream.Read(rdata, 0, Convert.ToInt32(InputStream.Length));
+            string strData = Encoding.ASCII.GetString(rdata);
+            strData = strData.Replace("[", "<");
+            strData = strData.Replace("]", ">");
+            strData = strData.Replace("&lb;", "[");
+            strData = strData.Replace("&rb;", "]");
+            XmlDocument vars = new XmlDocument();
+            vars.LoadXml("<root>" + strData + "</root>");
+            FunctionName = vars.FirstChild.ChildNodes[0].InnerXml;
+            CanvasID = vars.FirstChild.ChildNodes[1].InnerXml;
+            WindowID = vars.FirstChild.ChildNodes[2].InnerXml;
+            UnwrapVars(vars.FirstChild.ChildNodes[3]);
+            UnwrapParams(vars.FirstChild.ChildNodes[5]);
+            if (vars.FirstChild.ChildNodes[4].InnerXml != null && vars.FirstChild.ChildNodes[4].InnerXml != "null")
             {
-                if (s.ID == tmp)
+                Guid tmp = new Guid(vars.FirstChild.ChildNodes[4].InnerXml);
+                foreach (Session s in Sessions.SessionsData)
                 {
-                    CurrentSessionObj = s;
-                    break;
+                    if (s.ID == tmp)
+                    {
+                        CurrentSessionObj = s;
+                        break;
+                    }
                 }
             }
+            JavaScriptCodeToSendInThisCall = new List<JavaScriptFunctionsToSendAndAttachOnClientSide>();
         }
-        JavaScriptCodeToSendInThisCall = new List<JavaScriptFunctionsToSendAndAttachOnClientSide>();
     }
 
     public void UnwrapParams(XmlNode node)
